@@ -1,5 +1,4 @@
 import pygame;
-from pygame import locals;
 
 class Tile():
     def __init__(self, fileAddress, width, height):
