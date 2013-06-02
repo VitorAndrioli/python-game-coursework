@@ -7,18 +7,20 @@ from gameSprite import GameSprite;
 surface = pygame.display.set_mode((640, 480), 0, 32);
 clock = pygame.time.Clock();
 
-tileFranky = Tile("img/sprite_t.png", 240, 190);
+tileFranky = Tile("img/sprite2.png", 150, 150);
 
 bricksStand = [Brick(0, 0, tileFranky), Brick(0, 1, tileFranky), Brick(0, 2, tileFranky), Brick(0, 3, tileFranky)];
 bricksWalk = [Brick(4, 4, tileFranky), Brick(4, 5, tileFranky), Brick(4, 6, tileFranky), Brick(4, 7, tileFranky), Brick(4, 8, tileFranky), Brick(4, 9, tileFranky), Brick(4, 10, tileFranky), Brick(4, 11, tileFranky)];
-bricksJump = [Brick(12, 12, tileFranky), Brick(12, 13, tileFranky), Brick(12, 14, tileFranky), Brick(12, 15, tileFranky), Brick(12, 16, tileFranky),Brick(12, 17, tileFranky), Brick(12, 18, tileFranky)];
+bricksDuck = [Brick(12, 12, tileFranky)];
+bricksJump = [Brick(13, 13, tileFranky), Brick(13, 14, tileFranky), Brick(13, 15, tileFranky), Brick(13, 16, tileFranky), Brick(13, 17, tileFranky), Brick(13, 18, tileFranky), Brick(13, 19, tileFranky)]
 
-franky = GameSprite(bricksStand, (100, 100));
+franky = GameSprite(bricksStand, (100, 200));
 
 moveRight = False;
 moveLeft = False;
-stand = True;
+duck = False;
 jump = False;
+
 while(True):
     
     surface.fill((0, 0, 0));
@@ -31,39 +33,50 @@ while(True):
     for e in pygame.event.get():
         if (e.type == pygame.locals.KEYDOWN):
             if (e.key == pygame.locals.K_RIGHT):
+                franky.counter = 0;
                 moveRight = True;
-                stand = False;
             elif (e.key == pygame.locals.K_LEFT):
+                franky.counter = 0;
                 moveLeft = True;
-                stand = False;
+            elif (e.key == pygame.locals.K_DOWN):
+                franky.counter = 0;
+                duck = True;
             elif (e.key == pygame.locals.K_UP):
+                franky.counter = 0;
                 jump = True;
-                stand = False; 
         elif (e.type == pygame.locals.KEYUP):
             if (e.key == pygame.locals.K_RIGHT):
+                franky.counter = 0;
                 moveRight = False;
-                stand = True;
             elif (e.key == pygame.locals.K_LEFT):
+                franky.counter = 0;
                 moveLeft = False;
-                stand = True;
+            elif (e.key == pygame.locals.K_DOWN):
+                franky.counter = 0;
+                duck = False;
             elif (e.key == pygame.locals.K_UP):
+                franky.counter = 0;
                 jump = False;
-                stand = True;
         elif (e.type == pygame.locals.QUIT):
             exit();
             
     
-    if (stand):
-        franky.bricks = bricksStand;
-        
-    if (moveRight):
-        #franky.setPosition((franky.pos[0]+5, franky.pos[1]));
-        franky.bricks = bricksWalk;
-        
-    if (moveLeft):
-        franky.setPosition((franky.pos[0]-10, franky.pos[1]));
-    
     if (jump):
         franky.bricks = bricksJump;
-        franky.setPosition((franky.pos[0], franky.pos[1]));
-        franky.jump();
+        
+    elif (duck):
+        franky.bricks = bricksDuck;
+    
+    elif (moveRight):
+        if (not franky.right):
+            franky.right = True;
+        franky.setPosition((franky.pos[0]+8, franky.pos[1]));
+        franky.bricks = bricksWalk;
+        
+    elif (moveLeft):
+        if (franky.right):
+            franky.right = False;
+        franky.setPosition((franky.pos[0]-8, franky.pos[1]));
+        franky.bricks = bricksWalk;
+    else:
+        franky.bricks = bricksStand;
