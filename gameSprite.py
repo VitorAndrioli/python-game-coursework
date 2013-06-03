@@ -5,7 +5,7 @@ class GameSprite():
         self.bricks = bricks;
         self.pos = pos;
         self.counter = 0;
-        self.animationSpeed = 4;
+        self.animationSpeed = 2;
         self.animationStep = 0;
         self.right = True;
         self.jumpCounter = 0;
