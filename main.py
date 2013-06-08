@@ -3,6 +3,7 @@ from pygame import locals;
 from tile import Tile;
 from brick import Brick;
 from gameSprite import GameSprite;
+from plant import Plant;
 
 surface = pygame.display.set_mode((640, 480), 0, 32);
 clock = pygame.time.Clock();
@@ -11,18 +12,17 @@ tileFranky = Tile("img/sprite2.png", 150, 150);
 tileChopperman = Tile("img/chopperman.png", 50, 60);
 tilePlant = Tile("img/killer_plant.png", 96, 85);
 
+plant = Plant((300, 280), surface);
+
 bricksStand = [Brick(0, 0, tileFranky), Brick(0, 1, tileFranky), Brick(0, 2, tileFranky), Brick(0, 3, tileFranky)];
 bricksWalk = [Brick(4, 4, tileFranky), Brick(4, 5, tileFranky), Brick(4, 6, tileFranky), Brick(4, 7, tileFranky), Brick(4, 8, tileFranky), Brick(4, 9, tileFranky), Brick(4, 10, tileFranky), Brick(4, 11, tileFranky)];
 bricksDuck = [Brick(12, 12, tileFranky)];
 bricksJump = [Brick(13, 13, tileFranky), Brick(13, 14, tileFranky), Brick(13, 15, tileFranky), Brick(13, 16, tileFranky), Brick(13, 17, tileFranky), Brick(13, 18, tileFranky), Brick(13, 19, tileFranky)]
 
 bricksChopperman = [Brick(0, 0, tileChopperman), Brick(0, 1, tileChopperman), Brick(0, 2, tileChopperman), Brick(0, 3, tileChopperman)];
-bricksPlant = [Brick(0, 0, tilePlant), Brick(0, 1, tilePlant)];
-bricksPlantHit = [Brick(0, 2, tilePlant), Brick(0, 3, tilePlant), Brick(0, 3, tilePlant), Brick(0, 3, tilePlant)];
 
 franky = GameSprite(bricksStand, (100, 200));
 chopperman = GameSprite(bricksChopperman, (0, 30));
-plant = GameSprite(bricksPlant, (300, 280));
 
 moveRight = False;
 moveLeft = False;
@@ -38,7 +38,6 @@ while(True):
     chopperman.render(surface);
     
     plant.update();
-    plant.render(surface);
     
     franky.update();
     franky.render(surface);
@@ -60,11 +59,8 @@ while(True):
             elif (e.key == pygame.locals.K_UP):
                 franky.counter = 0;
                 jump = True;
-            elif (e.key == pygame.locals.K_0):
-                plant.counter = 0;
-                plant.bricks = bricksPlantHit;
             elif (e.key == pygame.locals.K_1):
-                chopperman.pos = (0, chopperman.pos[1]);
+                plant.attack();
         elif (e.type == pygame.locals.KEYUP):
             if (e.key == pygame.locals.K_RIGHT):
                 franky.counter = 0;
@@ -78,9 +74,6 @@ while(True):
             elif (e.key == pygame.locals.K_UP):
                 franky.counter = 0;
                 jump = False;
-            elif (e.key == pygame.locals.K_0):
-                plant.counter = 0;
-                plant.bricks = bricksPlant;
         elif (e.type == pygame.locals.QUIT):
             exit();
             
