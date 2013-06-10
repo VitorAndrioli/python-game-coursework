@@ -11,7 +11,7 @@ class Chopperman():
         
         self.counter = 0;
         self.animationStep = 0;
-        self.animationSpeed = 3;
+        self.animationSpeed = 100;
         
         self.tile = Tile("img/chopperman.png", self.width, self.height);
         self.bricks = [Brick(0, 0, self.tile), Brick(1, 1, self.tile), Brick(2, 2, self.tile), Brick(3, 3, self.tile)];
@@ -19,8 +19,6 @@ class Chopperman():
         self.PPM = PPM;
         self.surface = surface;
         self.world = world;
-        
-        self.up = True;
         
         self.createPhysicalBody(pos);
         
@@ -32,30 +30,16 @@ class Chopperman():
         self.body = self.world.CreateBody( bodyDef );
         
         bodyFixture = b2.b2FixtureDef();
-        bodyFixture.density = 0;
-        bodyFixture.friction = 0.0;
-        bodyFixture.restitution = 0.0;
+        bodyFixture.density = 10;
+        bodyFixture.friction = 0;
+        bodyFixture.restitution = 0;
         bodyFixture.shape = b2.b2PolygonShape( box = (self.width/2, self.height/2) );
         
-        self.up = True;
-        self.high = 0;
-        self.highValue = 1;
         self.body.CreateFixture(bodyFixture);
         
     def update(self):
-        self.high +=1;
-        if (self.high == 15):
-            self.high = 0;
-            if (self.up):
-                self.up = False;
-                self.highValue = -1;
-            else:
-                self.up = True;
-                self.highValue = 1;
-           
-        self.body.position = (self.body.position[0] + 5, self.body.position[1] + self.highValue);
-        self.body.ApplyForce((0, -10), self.body.position, True);
-        
+        #self.body.position = (self.body.position[0] + 5, self.body.position[1] + self.highValue);
+        self.body.ApplyForce((5000, -216000), self.body.position, True);
         
         self.animationStep += 1;
         if (self.animationStep == self.animationSpeed):
