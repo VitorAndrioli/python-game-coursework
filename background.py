@@ -1,36 +1,71 @@
 import Box2D as b2;
 import pygame;
+import json;
+from tile import Tile;
+from brick import Brick;
 
 class Background():
     def __init__(self, surface, world):
         self.world = world;
         self.surface = surface;
+        self.PPM = 60.0;
+        self.index = 0;
+#        self.createBody();
+        self.load();
         
-        self.createBody();
         
-    def createBody(self):
+    def createBody(self, pos, width, height):
         
         bodyDef = b2.b2BodyDef();
-        bodyDef.position = (0, 430);
+        bodyDef.position = pos;
         bodyDef.type = b2.b2_staticBody;
         bodyDef.angle = 0;
         self.body = self.world.CreateBody( bodyDef );
+        self.body.userData = {"name": "floor"};
         
         bodyFixture = b2.b2FixtureDef();
-        bodyFixture.shape = b2.b2PolygonShape( box=(800, 80));
-        bodyFixture.friction = 1;
+        bodyFixture.shape = b2.b2PolygonShape( box=(width/2, height/2));
         bodyFixture.restitution = 0;
         
         self.body.CreateFixture( bodyFixture );
     
-    def draw(self):
-        shape = self.body.fixtures[0].shape;
-        pixelVertices = [];
-        for vertice in shape.vertices:
-            v = self.body.transform * vertice;
-            pixelVertices.append(v);
-            
-        pygame.draw.polygon(self.surface, (0, 255, 0), pixelVertices);
+    def load(self):
+        arquivo = open("json/back.json");
+        jsonFile = json.load(arquivo);
         
-        
-    
+        for layer in jsonFile["layers"]:
+            if (layer["type"] == "objectgroup"):
+                objects = layer["objects"];
+                for obj in objects:
+                    width = obj["width"] / self.PPM;
+                    height = obj["height"] / self.PPM;
+                    
+                    x = (obj["x"] / self.PPM) + width/2;
+                    y = (obj["y"] / self.PPM) + height/2;
+                    pos = (x, y);
+                    
+                    self.createBody(pos, width, height);
+                    
+            elif (layer["type"] == "tilelayer"):
+                self.data = layer["data"];
+                self.coluns = layer["width"];
+                self.lines = layer["height"];
+                tileSets = jsonFile["tilesets"];
+                for ts in tileSets:
+                    tileImage = ts["image"];
+                    tileWidth = ts["tilewidth"];
+                    tileHeight = ts["tileheight"];
+                    self.tileSet = Tile(tileImage, tileWidth, tileHeight);
+                    
+    def drawBackground(self):
+        self.index = 0;
+        for l in range(self.lines):
+            for c in range(self.coluns):
+                x = c*32;
+                y = l*32;
+                gid = self.data[self.index]-1;
+                if (gid >= 0):
+                    self.surface.blit(Brick(0, gid, self.tileSet).getImage(), (x, y));
+                self.index+=1;
+                
+                
