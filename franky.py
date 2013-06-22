@@ -34,6 +34,7 @@ class Franky():
         self.duck = False;
         self.jumping = False;
         self.right = True;
+        self.moveBody = True;
         
         self.createPhysicalBody();
         
@@ -54,27 +55,35 @@ class Franky():
         bodyFixture.restitution = 0;
         
         self.body.CreateFixture( bodyFixture);
-#        print self.body.mass;
+
     def update(self):
-        self.collision();
         if (self.life > 0):
+            self.collision();
+      
             if (self.jumping):
                 self.bricks = self.bricksJump;
-                if (self.moveRight):
-                    self.right = True;
-                    self.body.ApplyForce((0.06, 0), self.body.position, True);
-                elif (self.moveLeft):
-                    self.right = False;
-                    self.body.ApplyForce((-0.06, 0), self.body.position, True);
+#                if (self.moveRight):
+#                    self.right = True;
+#                    self.body.ApplyForce((0.06, 0), self.body.position, True);
+#                elif (self.moveLeft):
+#                    self.right = False;
+#                    self.body.ApplyForce((-0.06, 0), self.body.position, True);
+            
             elif (self.duck):
                 self.bricks = self.bricksDuck;
-            elif (self.moveRight):
-                self.right = True;
-                self.body.ApplyLinearImpulse((0.002, 0), self.body.position, True);
-                self.bricks = self.bricksWalk;
+           
+            if (self.body.position[0] >= self.surface.get_width()/(2*self.PPM)):
+                self.moveBody = False;
+            
+            if (self.moveRight):
+                if (self.moveBody or True):
+                    self.right = True;
+                    self.body.ApplyLinearImpulse((0.03, 0), self.body.position, True);
+                    self.bricks = self.bricksWalk;
             elif (self.moveLeft):
+                self.moveBody = True;
                 self.right = False;
-                self.body.ApplyLinearImpulse((-0.0045, 0), self.body.position, True);
+                self.body.ApplyLinearImpulse((-0.03, 0), self.body.position, True);
                 self.bricks = self.bricksWalk;
             else:
                 self.bricks = self.bricksStand;

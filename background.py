@@ -5,14 +5,16 @@ from tile import Tile;
 from brick import Brick;
 
 class Background():
-    def __init__(self, surface, world):
+    def __init__(self, surface, world, bgSurface):
         self.world = world;
         self.surface = surface;
         self.PPM = 60.0;
         self.index = 0;
-#        self.createBody();
-        self.load();
-        
+        self.pos = (0, 0);
+        self.bgSurface = bgSurface;
+
+        self.loadObjects();
+        self.getTileSet();
         
     def createBody(self, pos, width, height):
         
@@ -29,24 +31,36 @@ class Background():
         
         self.body.CreateFixture( bodyFixture );
     
-    def load(self):
+    def loadObjects(self):
         arquivo = open("json/back.json");
         jsonFile = json.load(arquivo);
-        
+        self.objects = [];
         for layer in jsonFile["layers"]:
             if (layer["type"] == "objectgroup"):
                 objects = layer["objects"];
                 for obj in objects:
+                    self.objects.append(obj);
                     width = obj["width"] / self.PPM;
                     height = obj["height"] / self.PPM;
                     
-                    x = (obj["x"] / self.PPM) + width/2;
-                    y = (obj["y"] / self.PPM) + height/2;
+                    x = self.pos[0] + ((obj["x"] / self.PPM) + width/2);
+                    y = self.pos[1] + (obj["y"] / self.PPM) + height/2;
                     pos = (x, y);
                     
                     self.createBody(pos, width, height);
-                    
-            elif (layer["type"] == "tilelayer"):
+        
+        self.updateObjects();
+        
+    def updateObjects(self):
+        x=1;
+
+        
+    def getTileSet(self):        
+        arquivo = open("json/back.json");
+        jsonFile = json.load(arquivo);
+        
+        for layer in jsonFile["layers"]:
+            if (layer["type"] == "tilelayer"):
                 self.data = layer["data"];
                 self.coluns = layer["width"];
                 self.lines = layer["height"];
@@ -56,7 +70,9 @@ class Background():
                     tileWidth = ts["tilewidth"];
                     tileHeight = ts["tileheight"];
                     self.tileSet = Tile(tileImage, tileWidth, tileHeight);
-                    
+        
+        self.drawBackground();
+        
     def drawBackground(self):
         self.index = 0;
         for l in range(self.lines):
@@ -65,7 +81,15 @@ class Background():
                 y = l*32;
                 gid = self.data[self.index]-1;
                 if (gid >= 0):
-                    self.surface.blit(Brick(0, gid, self.tileSet).getImage(), (x, y));
+                    self.bgSurface.blit(Brick(0, gid, self.tileSet).getImage(), (x, y));
                 self.index+=1;
                 
-                
+    def update(self):
+        self.surface.blit(self.bgSurface, self.pos);
+        
+    def move(self, dir):
+        if (dir =="right"):
+            self.pos = (self.pos[0] - 1, self.pos[1]);
+        else:
+            self.pos = (self.pos[0] + 1, self.pos[1]);
+            
