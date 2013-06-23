@@ -125,7 +125,7 @@ class Franky():
         self.animationStep = 0;
         self.jumping = True;
         self.animationSpeed = 80;
-        impulse = self.body.mass * 500;
+        impulse = self.body.mass * 350;
         self.body.ApplyForce((0, -impulse), self.body.position, True);
         
     def die(self):

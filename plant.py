@@ -69,7 +69,7 @@ class Plant():
             v = self.body.transform * vertice * self.PPM;
             pixelVertices.append(v);
             
-#        pygame.draw.polygon(self.surface, (0, 255, 255), pixelVertices);
+        pygame.draw.polygon(self.surface, (0, 255, 255), pixelVertices);
         self.surface.blit(self.bricks[self.counter].getImage(), (self.pos[0] - self.width/2, self.pos[1] - self.height/2));
     
     def attack(self, enemy):

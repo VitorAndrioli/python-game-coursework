@@ -89,7 +89,7 @@ class Background():
         
     def move(self, dir):
         if (dir =="right"):
-            self.pos = (self.pos[0] - 1, self.pos[1]);
+            self.pos = (self.pos[0] - 2, self.pos[1]);
         else:
-            self.pos = (self.pos[0] + 1, self.pos[1]);
+            self.pos = (self.pos[0] + 2, self.pos[1]);
             
