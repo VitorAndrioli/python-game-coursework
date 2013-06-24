@@ -24,6 +24,7 @@ class Wapol():
         self.tile = Tile("img/wapol.png", self.widthSprite, self.heightSprite);
         self.bricksStand = [Brick(0, 0, self.tile), Brick(0, 1, self.tile), Brick(0, 2, self.tile), Brick(0, 3, self.tile)];
         self.bricksWalk = [Brick(4, 4, self.tile), Brick(4, 5, self.tile), Brick(4, 6, self.tile), Brick(4, 7, self.tile), Brick(4, 8, self.tile), Brick(4, 9, self.tile), Brick(4, 10, self.tile), Brick(4, 11, self.tile)];
+        self.bricksDie = [Brick(12, 12, self.tileSet), Brick(12, 13, self.tileSet), Brick(12, 14, self.tileSet)];
         self.bricks = self.bricksStand;
         
         self.moveRight = True;
