@@ -54,8 +54,9 @@ class Drake():
         bodyFixture.density = 0.07;
         bodyFixture.restitution = 0;
         
-        self.body.CreateFixture( bodyFixture);
-
+        self.body.CreateFixture( bodyFixture );
+        
+        
     def update(self):
         if (self.life > 0):
             self.collision();

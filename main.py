@@ -17,7 +17,7 @@ bgSurface = pygame.Surface((8000, 608), 0, 32);
 plant = Plant((950, 70), bgSurface, world, PPM);
 background = Background(surface, world, bgSurface);
 drake = Drake((200, 200), surface, world, PPM);
-wapol = Wapol((500, 200), bgSurface, world, PPM);
+wapol = Wapol((500, 547), surface, world, PPM);
 
 menuSurface = Menu("enter to start");
 menu = True;
@@ -45,7 +45,7 @@ while(True):
         wapol.update();
         
         if (moveBackgroundRight):
-            print drake.body.position[0];
+#            print drake.body.position[0];
             
             world.ShiftOrigin((2/PPM, 0));
             background.move("right");

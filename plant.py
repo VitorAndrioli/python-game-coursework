@@ -89,9 +89,16 @@ class Plant():
         self.attacking = False;
         
     def collision(self):
+        
         for contact_edges in self.body.contacts:
             contact = contact_edges.contact;
-            enemy = contact.fixtureB.body;
-            if (self.ableToMove):
-                self.ableToMove = False;
+            if (contact.fixtureA.body.userData["name"] == "plant"):
+                enemy = contact.fixtureB.body;
+            else :
+                enemy = contact.fixtureA.body;
+           
+            if (contact.manifold.localNormal == (0, 1)):
+                self.die();
+            else:
                 self.attack(enemy);
+               

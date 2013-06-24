@@ -18,14 +18,15 @@ class Wapol():
         
         self.counter = 0;
         self.animationStep = 0;
-        self.animationSpeed = 100;
+        self.animationSpeed = 30;
+        self.moveCounter = 0;
         
         self.tile = Tile("img/wapol.png", self.widthSprite, self.heightSprite);
         self.bricksStand = [Brick(0, 0, self.tile), Brick(0, 1, self.tile), Brick(0, 2, self.tile), Brick(0, 3, self.tile)];
         self.bricksWalk = [Brick(4, 4, self.tile), Brick(4, 5, self.tile), Brick(4, 6, self.tile), Brick(4, 7, self.tile), Brick(4, 8, self.tile), Brick(4, 9, self.tile), Brick(4, 10, self.tile), Brick(4, 11, self.tile)];
         self.bricks = self.bricksStand;
         
-        self.moveRight = False;
+        self.moveRight = True;
         self.moveLeft = False;
         self.right = True;
         
@@ -37,6 +38,7 @@ class Wapol():
         bodyDef.angle = 0;
         bodyDef.fixedRotation = True;
         bodyDef.type = b2.b2_kinematicBody;
+        bodyDef.linearVelocity = (0, 0)
         self.body = self.world.CreateBody( bodyDef );
         self.body.userData = {"name": "wapol"};
         
@@ -48,18 +50,48 @@ class Wapol():
         bodyFixture.restitution = 0;
         
         self.body.CreateFixture( bodyFixture);
-
+        
     def update(self):
-#        self.collision();
-  
+        self.collision();
+        
+        if (self.moveCounter == 500):
+            self.counter = 0;
+            self.animationStep = 0;
+            self.animationSpeed = 70;
+            self.moveRight = False;
+            self.moveLeft = False;
+        elif (self.moveCounter == 900):
+            self.counter = 0;
+            self.animationStep = 0;
+            self.animationSpeed = 30;
+            self.moveRight = False;
+            self.moveLeft = True;
+        elif (self.moveCounter == 1300):
+            self.counter = 0;
+            self.animationStep = 0;
+            self.animationSpeed = 70;
+            self.moveRight = False;
+            self.moveLeft = False;
+        elif (self.moveCounter == 1700):
+            self.counter = 0;
+            self.animationStep = 0;
+            self.animationSpeed = 30;
+            self.moveRight = True;
+            self.moveLeft = False;
+            self.moveCounter = 0;
+        self.moveCounter += 1;
+            
         if (self.moveRight):
             self.right = True;
             self.bricks = self.bricksWalk;
+            self.body.linearVelocity = ((0.5, 0));
         elif (self.moveLeft):
             self.right = False;
             self.bricks = self.bricksWalk;
+            self.body.linearVelocity = ((-0.5, 0));
         else:
             self.bricks = self.bricksStand;
+            self.body.linearVelocity = ((0, 0));
         
         self.animationStep += 1;
         if (self.animationStep == self.animationSpeed):
@@ -67,7 +99,7 @@ class Wapol():
             if (self.counter == len(self.bricks)):
                 self.counter = 0;
             self.animationStep = 0;
-            
+        
         self.render();
         
     def render(self):
@@ -77,7 +109,7 @@ class Wapol():
             v = self.body.transform * vertice * self.PPM;
             pixelVertices.append(v);
         
-        pygame.draw.polygon(self.surface, (0, 0, 255), pixelVertices);
+#        pygame.draw.polygon(self.surface, (0, 0, 255), pixelVertices);
         if (self.right):
             sprite = self.bricks[self.counter].getImage();
         else :
@@ -88,18 +120,21 @@ class Wapol():
     def die(self):
         print "DEATH";
         
-#    def collision(self):
-#        for contact_edge in self.body.contacts:
-#            contact = contact_edge.contact;
-#            other = contact.fixtureA.body;
-#            otherName = other.userData["name"];
-#            if (self.jumping and otherName == "floor"):
-#                self.jumping = False;
-#                self.animationStep = 0;
-#                self.counter = 0;
-#                self.bricks = self.bricksStand;
-            
+    def collision(self):
         
+        for contact_edges in self.body.contacts:
+            contact = contact_edges.contact;
+            if (contact.fixtureA.body.userData["name"] == "wapol"):
+                enemy = contact.fixtureB.body;
+            else :
+                enemy = contact.fixtureA.body;
+           
+            if (contact.manifold.localNormal == (0, 1)):
+                self.die();
+            else:
+                enemy.userData["self"].getHit(10);
+                
+            
         
         
         
