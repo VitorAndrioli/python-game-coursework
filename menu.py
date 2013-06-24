@@ -1,4 +1,6 @@
 import pygame;
+from tile import Tile;
+from brick import Brick;
 
 class Menu():
     def __init__(self, message):
@@ -12,8 +14,15 @@ class Menu():
         y = (self.surface.get_height() - self.image.get_height()) / 2;
         self.surface.blit(self.image, (x, y));
         
-        self.animationStep = 0;
+        self.menuBlink = 0;
         self.show = True;
+        
+        self.animationStep = 0;
+        self.animationPosition = (0, 0);
+        imageAdress = "img/menu_animation.png";
+        self.tileSet = Tile(imageAdress, 10, 10);
+        self.bricks = [Brick(0, 0, self.tileSet), Brick(1, 1, self.tileSet), Brick(2, 2, self.tileSet), Brick(3, 3, self.tileSet), Brick(4, 4, self.tileSet), Brick(5, 5, self.tileSet), Brick(6, 6, self.tileSet), Brick(7, 7, self.tileSet), Brick(8, 8, self.tileSet)]; 
+        self.animationImage = self.bricks[0];
         
     def writeMessage(self):
         pygame.font.init();
@@ -30,8 +39,8 @@ class Menu():
         return self.surface;
     
     def update(self):
-        self.animationStep+=1;
-        if (self.animationStep == 300):
+        self.menuBlink+=1;
+        if (self.menuBlink == 300):
             self.messageSurface.fill((0, 0, 0));
             if (self.show):
                 self.showMessage = self.message;
@@ -40,5 +49,11 @@ class Menu():
                 self.showMessage = "";
                 self.show = True;
             self.writeMessage();
-            self.animationStep = 0;
+            self.menuBlink = 0;
+            
+    def animation(self):
+        if (self.stepAnimation < 300):
+            self.animationPosition = (self.animationPosition[0], self.animationPosition[0] + 5);
+        
+        self.animationStep += 1;
             
