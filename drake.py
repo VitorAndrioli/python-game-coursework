@@ -4,15 +4,15 @@ from tile import Tile;
 import pygame;
 from pygame import Rect;
 
-class Franky():
+class Drake():
     def __init__(self, pos, surface, world, PPM):
-        self.width = 120;
+        self.width = 60;
         self.height = 115;
-        self.spriteWidth = 150;
-        self.spriteHeight = 150;
+        self.widthSprite = 265;
+        self.heightSprite = 148;
         self.pos = (pos[0]/PPM, pos[1]/PPM);
         self.life = 200;
-        self.franky = self;
+        self.drake = self;
         
         self.world = world;
         self.surface = surface;
@@ -20,13 +20,13 @@ class Franky():
         
         self.counter = 0;
         self.animationStep = 0;
-        self.animationSpeed = 100;
+        self.animationSpeed = 80;
         
-        self.tile = Tile("img/franky.png", self.spriteWidth, self.spriteHeight);
+        self.tile = Tile("img/drake.png", self.widthSprite, self.heightSprite);
         self.bricksStand = [Brick(0, 0, self.tile), Brick(0, 1, self.tile), Brick(0, 2, self.tile), Brick(0, 3, self.tile)];
         self.bricksWalk = [Brick(4, 4, self.tile), Brick(4, 5, self.tile), Brick(4, 6, self.tile), Brick(4, 7, self.tile), Brick(4, 8, self.tile), Brick(4, 9, self.tile), Brick(4, 10, self.tile), Brick(4, 11, self.tile)];
-        self.bricksDuck = [Brick(12, 12, self.tile)];
-        self.bricksJump = [Brick(13, 13, self.tile), Brick(13, 14, self.tile), Brick(13, 15, self.tile), Brick(13, 16, self.tile), Brick(13, 17, self.tile), Brick(13, 18, self.tile), Brick(13, 19, self.tile)]
+        self.bricksDuck = [Brick(21, 21, self.tile)];
+        self.bricksJump = [Brick(20, 20, self.tile)]
         self.bricks = self.bricksStand;
         
         self.moveRight = False;
@@ -45,7 +45,7 @@ class Franky():
         bodyDef.fixedRotation = True;
         bodyDef.type = b2.b2_dynamicBody;
         self.body = self.world.CreateBody( bodyDef );
-        self.body.userData = {"name": "franky", "self": self};
+        self.body.userData = {"name": "drake", "self": self};
         
         bodyFixture = b2.b2FixtureDef();
         width = float(self.width)/(2*self.PPM);
@@ -72,13 +72,14 @@ class Franky():
             elif (self.duck):
                 self.bricks = self.bricksDuck;
            
-            if (self.body.position[0] >= self.surface.get_width()/(2*self.PPM)):
-                self.moveBody = False;
-            
-            if (self.moveRight):
+#            if (self.body.position[0] >= self.surface.get_width()/(2*self.PPM)):
+#                self.moveBody = False;
+#            
+            elif (self.moveRight):
                 if (self.moveBody or True):
                     self.right = True;
-                    self.body.ApplyLinearImpulse((0.03, 0), self.body.position, True);
+                    if (self.body.position[0] < 10):
+                        self.body.ApplyLinearImpulse((0.03, 0), self.body.position, True);
                     self.bricks = self.bricksWalk;
             elif (self.moveLeft):
                 self.moveBody = True;
@@ -109,13 +110,13 @@ class Franky():
             v = self.body.transform * vertice * self.PPM;
             pixelVertices.append(v);
         
-#        pygame.draw.polygon(self.surface, (0, 0, 255), pixelVertices);
+        pygame.draw.polygon(self.surface, (0, 0, 255), pixelVertices);
         if (self.right):
             sprite = self.bricks[self.counter].getImage();
         else :
             sprite = pygame.transform.flip(self.bricks[self.counter].getImage(), True, False);
         
-        self.surface.blit(sprite, (self.body.position[0]*self.PPM - self.spriteWidth/2, self.body.position[1]*self.PPM - self.spriteHeight/2 - 5));
+        self.surface.blit(sprite, (self.body.position[0]*self.PPM - self.widthSprite/2, self.body.position[1]*self.PPM - self.heightSprite/2 - 5));
         
     def drawLifeBar(self):
         
@@ -125,6 +126,7 @@ class Franky():
         self.animationStep = 0;
         self.jumping = True;
         self.animationSpeed = 80;
+        self.bricks = self.bricksJump;
         impulse = self.body.mass * 350;
         self.body.ApplyForce((0, -impulse), self.body.position, True);
         

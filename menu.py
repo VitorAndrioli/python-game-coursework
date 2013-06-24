@@ -7,7 +7,7 @@ class Menu():
         self.surface = pygame.Surface((1200, 608), 0, 32);
         self.messageSurface = pygame.Surface((1200, 50), 0, 32);
         
-        self.image = pygame.image.load("img/chopperman.png");
+        self.image = pygame.image.load("img/titulo.png");
         x = (self.surface.get_width() - self.image.get_width()) / 2;
         y = (self.surface.get_height() - self.image.get_height()) / 2;
         self.surface.blit(self.image, (x, y));
@@ -23,7 +23,7 @@ class Menu():
         textRect.centerx = self.messageSurface.get_rect().centerx
         textRect.centery = self.messageSurface.get_rect().centery
         self.messageSurface.blit(text, textRect);
-        self.surface.blit(self.messageSurface, (0, 400));
+        self.surface.blit(self.messageSurface, (0, 430));
         
         
     def getSurface(self):
