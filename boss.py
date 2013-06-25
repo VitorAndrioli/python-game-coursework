@@ -62,7 +62,8 @@ class Boss():
                 self.walk("left");
             elif (self.moveCounter == self.range*2):
                 self.walk("right");
-                new = Somersault((200, 520), self.surface, self.world, self.PPM);
+                print (self.pos[0]*self.PPM, self.pos[1]*self.PPM)
+                new = Somersault((self.pos[0]*self.PPM, self.pos[1]*self.PPM), self.surface, self.world, self.PPM);
                 self.mobList.append(new);
                 self.moveCounter = 0;
         
