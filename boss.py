@@ -62,9 +62,6 @@ class Boss():
                 self.walk("left");
             elif (self.moveCounter == self.range*2):
                 self.walk("right");
-                print (self.pos[0]*self.PPM, self.pos[1]*self.PPM)
-                new = Somersault((self.pos[0]*self.PPM, self.pos[1]*self.PPM), self.surface, self.world, self.PPM);
-                self.mobList.append(new);
                 self.moveCounter = 0;
         
             self.moveCounter += 1;
@@ -84,6 +81,12 @@ class Boss():
             self.deathCounter += 1;
             
         self.render();
+        
+    def newMob(self, qtde):
+        for somersault in range(qtde):
+            print (self.pos[0]*self.PPM, self.pos[1]*self.PPM)
+            new = Somersault((self.pos[0]*self.PPM, self.pos[1]*self.PPM), self.surface, self.world, self.PPM);
+            self.mobList.append(new);        
     
     def walk(self, direction):
         self.counter = 0;
@@ -118,23 +121,28 @@ class Boss():
             
             self.surface.blit(sprite, (self.body.position[0]*self.PPM - self.width/2, self.body.position[1]*self.PPM - self.height/2 - 5));
             
-    def die(self, enemy):
-        enemy.ApplyForce((0, -10), enemy.position, True);
+    def die(self):
         self.counter = 0;
         self.bricks = self.bricksDie;
         self.dying = True;
+        
+    def getHit(self, enemy):
+        enemy.ApplyForce((0, -10), enemy.position, True);
+        self.life -= 10;
+        if (self.life <= 0):
+            self.die();
         
     def collision(self):
         
         for contact_edges in self.body.contacts:
             contact = contact_edges.contact;
-            if (contact.fixtureA.body.userData["name"] == "boss"):
-                enemy = contact.fixtureB.body;
-            else :
+            if (contact.fixtureA.body.userData["name"] == "drake"):
                 enemy = contact.fixtureA.body;
+            elif (contact.fixtureB.body.userData["name"] == "drake"):
+                enemy = contact.fixtureB.body;
            
             if (contact.manifold.localNormal == (0, 1)):
-                self.die(enemy);
+                self.getHit(enemy);
             else:
                 enemy.userData["self"].getHit(10);
         
