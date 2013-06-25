@@ -1,36 +1,22 @@
 import Box2D as b2;
-import pygame;
 import json;
 from tile import Tile;
 from brick import Brick;
+import pygame;
 
 class Background():
-    def __init__(self, surface, world, bgSurface):
+    def __init__(self, surface, world, PPM):
         self.world = world;
         self.surface = surface;
-        self.PPM = 60.0;
+        self.PPM = PPM;
+        
         self.index = 0;
         self.pos = (0, 0);
-        self.bgSurface = bgSurface;
+        self.bgSurface = pygame.Surface((16000, 608), 0, 32);
 
         self.loadObjects();
         self.getTileSet();
         
-    def createBody(self, pos, width, height):
-        
-        bodyDef = b2.b2BodyDef();
-        bodyDef.position = pos;
-        bodyDef.type = b2.b2_staticBody;
-        bodyDef.angle = 0;
-        self.body = self.world.CreateBody( bodyDef );
-        self.body.userData = {"name": "floor"};
-        
-        bodyFixture = b2.b2FixtureDef();
-        bodyFixture.shape = b2.b2PolygonShape( box=(width/2, height/2));
-        bodyFixture.restitution = 0;
-        
-        self.body.CreateFixture( bodyFixture );
-    
     def loadObjects(self):
         arquivo = open("json/back.json");
         jsonFile = json.load(arquivo);
@@ -49,11 +35,22 @@ class Background():
                     
                     self.createBody(pos, width, height);
         
-        self.updateObjects();
+    def createBody(self, pos, width, height):
         
-    def updateObjects(self):
-        x=1;
-
+        bodyDef = b2.b2BodyDef();
+        bodyDef.position = pos;
+        bodyDef.type = b2.b2_staticBody;
+        bodyDef.angle = 0;
+        self.body = self.world.CreateBody( bodyDef );
+        self.body.userData = {"name": "floor"};
+        
+        bodyFixture = b2.b2FixtureDef();
+        bodyFixture.shape = b2.b2PolygonShape( box=(width/2, height/2));
+        bodyFixture.restitution = 0;
+        bodyFixture.friction = 0.5;
+        
+        self.body.CreateFixture( bodyFixture );
+    
         
     def getTileSet(self):        
         arquivo = open("json/back.json");

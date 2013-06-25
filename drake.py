@@ -53,6 +53,7 @@ class Drake():
         bodyFixture.shape = b2.b2PolygonShape( box=(width, height));
         bodyFixture.density = 0.07;
         bodyFixture.restitution = 0;
+        bodyFixture.friction = 0.5;
         
         self.body.CreateFixture( bodyFixture );
         
@@ -63,12 +64,12 @@ class Drake():
       
             if (self.jumping):
                 self.bricks = self.bricksJump;
-#                if (self.moveRight):
-#                    self.right = True;
-#                    self.body.ApplyForce((0.06, 0), self.body.position, True);
-#                elif (self.moveLeft):
-#                    self.right = False;
-#                    self.body.ApplyForce((-0.06, 0), self.body.position, True);
+                if (self.moveRight):
+                    self.right = True;
+#                    self.body.ApplyForce((0.001, 0), self.body.position, True);
+                elif (self.moveLeft):
+                    self.right = False;
+#                    self.body.ApplyForce((-0.001, 0), self.body.position, True);
             
             elif (self.duck):
                 self.bricks = self.bricksDuck;
@@ -76,13 +77,13 @@ class Drake():
 #            if (self.body.position[0] >= self.surface.get_width()/(2*self.PPM)):
 #                self.moveBody = False;
 #            
-            elif (self.moveRight):
+            elif (self.moveRight and not self.jumping):
                 if (self.moveBody or True):
                     self.right = True;
                     if (self.body.position[0] < 10):
                         self.body.ApplyLinearImpulse((0.03, 0), self.body.position, True);
                     self.bricks = self.bricksWalk;
-            elif (self.moveLeft):
+            elif (self.moveLeft and not self.jumping):
                 self.moveBody = True;
                 self.right = False;
                 self.body.ApplyLinearImpulse((-0.03, 0), self.body.position, True);
@@ -111,7 +112,7 @@ class Drake():
             v = self.body.transform * vertice * self.PPM;
             pixelVertices.append(v);
         
-        pygame.draw.polygon(self.surface, (0, 0, 255), pixelVertices);
+#        pygame.draw.polygon(self.surface, (0, 0, 255), pixelVertices);
         if (self.right):
             sprite = self.bricks[self.counter].getImage();
         else :
@@ -140,8 +141,13 @@ class Drake():
         if (eventType == pygame.locals.KEYDOWN):
             if (eventKey == pygame.locals.K_RIGHT):
                 self.moveRight = True;
+                if (self.jumping):
+                    self.body.ApplyForce((0.0001, 0), self.body.position, True);
+                    
             elif (eventKey == pygame.locals.K_LEFT):
                 self.moveLeft = True;
+                if (self.jumping):
+                    self.body.ApplyForce((-0.0001, 0), self.body.position, True);
             elif (eventKey == pygame.locals.K_DOWN):
                 self.duck = True;
             elif (eventKey == pygame.locals.K_UP):

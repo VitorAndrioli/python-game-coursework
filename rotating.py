@@ -3,31 +3,28 @@ from brick import Brick;
 from tile import Tile;
 import pygame;
 
-class Wapol():
-    def __init__(self, pos, surface, world, PPM, walkingRange):
+class Somersault():
+    def __init__(self, pos, surface, world, PPM):
 
         self.world = world;
         self.surface = surface;
         self.PPM = PPM;
         
-        self.width = 80;
-        self.height = 80;
-        self.widthSprite = 128;
-        self.heightSprite = 92;
+        self.width = 63;
+        self.height = 61;
         self.pos = (pos[0]/self.PPM, pos[1]/self.PPM);
         
         self.counter = 0;
         self.animationStep = 0;
-        self.animationSpeed = 30;
-        self.range = walkingRange;
-        self.moveCounter = self.range/2;
+        self.animationSpeed = 20;
+        self.moveCounter = 0;
         self.deathCounter = 0;
+        self.range = 900;
         
-        self.tile = Tile("img/wapol.png", self.widthSprite, self.heightSprite);
-        self.bricksStand = [Brick(0, 0, self.tile), Brick(0, 1, self.tile), Brick(0, 2, self.tile), Brick(0, 3, self.tile)];
-        self.bricksWalk = [Brick(4, 4, self.tile), Brick(4, 5, self.tile), Brick(4, 6, self.tile), Brick(4, 7, self.tile), Brick(4, 8, self.tile), Brick(4, 9, self.tile), Brick(4, 10, self.tile), Brick(4, 11, self.tile)];
-        self.bricksDie = [Brick(12, 12, self.tile), Brick(12, 13, self.tile)]
-        self.bricks = self.bricksWalk;
+        self.tile = Tile("img/rotating.png", self.width, self.height);
+        self.bricks = [Brick(0, 0, self.tile), Brick(0, 1, self.tile), Brick(0, 2, self.tile), 
+                       Brick(0, 3, self.tile), Brick(0, 4, self.tile), Brick(0, 5, self.tile),
+                       Brick(0, 6, self.tile), Brick(0, 7, self.tile), Brick(0, 8, self.tile)];
         
         self.moveRight = True;
         self.moveLeft = False;
@@ -42,30 +39,32 @@ class Wapol():
         bodyDef.position = (self.pos[0], self.pos[1]);
         bodyDef.angle = 0;
         bodyDef.fixedRotation = True;
-        bodyDef.type = b2.b2_kinematicBody;
-        bodyDef.linearVelocity = (0, 0)
+        bodyDef.type = b2.b2_dynamicBody;
         self.body = self.world.CreateBody( bodyDef );
-        self.body.userData = {"name": "wapol"};
+        self.body.userData = {"name": "somersault"};
         
         bodyFixture = b2.b2FixtureDef();
+        bodyFixture.density = 17;
+        bodyFixture.restitution = 0.7;
         width = float(self.width)/(2*self.PPM);
         height = float(self.height)/(2*self.PPM);
         bodyFixture.shape = b2.b2PolygonShape( box=(width, height));
         
         self.body.CreateFixture( bodyFixture);
-    
+        
     def update(self):
         
         self.collision();
         if (not self.dying):
-            if ((self.moveCounter == self.range) or (self.moveCounter == (self.range + 400 + self.range))):
-                self.stopWalking();
-            elif (self.moveCounter == (self.range + 400)):
-                self.walk("left");
-            elif (self.moveCounter == (self.range + 800 + self.range)):
-                self.walk("right");
-                self.moveCounter = 0;
+            
+            self.body.ApplyLinearImpulse((1.9, 0), self.body.position, True);
         
+#            if (self.moveCounter == self.range):
+#                self.walk("left");
+#            elif (self.moveCounter == self.range*2):
+#                self.walk("right");
+#                self.moveCounter = 0;
+#        
             self.moveCounter += 1;
         
             self.animationStep += 1;
@@ -84,20 +83,10 @@ class Wapol():
             
         self.render();
     
-    def stopWalking(self):
-        self.counter = 0;
-        self.animationStep = 0;
-        self.animationSpeed = 70;
-        self.moveRight = False;
-        self.moveLeft = False;
-        self.bricks = self.bricksStand;
-        self.body.linearVelocity = ((0, 0));
-        
     def walk(self, direction):
         self.counter = 0;
         self.animationStep = 0;
         self.animationSpeed = 30;
-        self.bricks = self.bricksWalk;
         if (direction == "right"):
             self.moveRight = True;
             self.moveLeft = False;
@@ -125,7 +114,7 @@ class Wapol():
             else :
                 sprite = pygame.transform.flip(self.bricks[self.counter].getImage(), True, False);
             
-            self.surface.blit(sprite, (self.body.position[0]*self.PPM - self.widthSprite/2, self.body.position[1]*self.PPM - self.heightSprite/2 - 5));
+            self.surface.blit(sprite, (self.body.position[0]*self.PPM - self.width/2, self.body.position[1]*self.PPM - self.height/2 - 5));
             
     def die(self, enemy):
         enemy.ApplyForce((0, -10), enemy.position, True);
@@ -137,13 +126,13 @@ class Wapol():
         
         for contact_edges in self.body.contacts:
             contact = contact_edges.contact;
-            if (contact.fixtureA.body.userData["name"] == "wapol"):
+            if (contact.fixtureA.body.userData["name"] == "somersault"):
                 enemy = contact.fixtureB.body;
             else :
                 enemy = contact.fixtureA.body;
            
-            if (contact.manifold.localNormal == (0, 1)):
-                self.die(enemy);
-            else:
-                enemy.userData["self"].getHit(10);
-        
+#            if (contact.manifold.localNormal == (0, 1)):
+#                self.die(enemy);
+#            else:
+#                enemy.userData["self"].getHit(10);
+#        

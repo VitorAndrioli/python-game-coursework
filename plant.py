@@ -69,8 +69,8 @@ class Plant():
             v = self.body.transform * vertice * self.PPM;
             pixelVertices.append(v);
             
-        pygame.draw.polygon(self.surface, (0, 255, 255), pixelVertices);
-        self.surface.blit(self.bricks[self.counter].getImage(), (self.pos[0] - self.width/2, self.pos[1] - self.height/2));
+#        pygame.draw.polygon(self.surface, (0, 255, 255), pixelVertices);
+        self.surface.blit(self.bricks[self.counter].getImage(), (self.body.position[0]*self.PPM - self.width/2, self.body.position[1]*self.PPM - self.height/2));
     
     def attack(self, enemy):
         enemy.ApplyForce((-3, -5), enemy.position, True);
@@ -97,8 +97,5 @@ class Plant():
             else :
                 enemy = contact.fixtureA.body;
            
-            if (contact.manifold.localNormal == (0, 1)):
-                self.die();
-            else:
-                self.attack(enemy);
+            self.attack(enemy);
                
