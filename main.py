@@ -97,6 +97,7 @@ while(True):
                 elif (e.key == pygame.locals.K_p):
                     paused = True;
                 elif (e.key == pygame.locals.K_z):
+#                    PPM -= 5;
                     new = Somersault((200, 420), surface, world, PPM);
                     somersaultList.append(new);
                     
