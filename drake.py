@@ -4,6 +4,8 @@ from tile import Tile;
 import pygame;
 from pygame import Rect;
 
+#Classe dp heroi, X-Drake
+
 class Drake():
     def __init__(self, pos, surface, world, PPM):
         self.width = 60;
@@ -11,8 +13,6 @@ class Drake():
         self.widthSprite = 265;
         self.heightSprite = 148;
         self.pos = (pos[0]/PPM, pos[1]/PPM);
-        self.life = 200;
-        self.drake = self;
         
         self.world = world;
         self.surface = surface;
@@ -24,9 +24,13 @@ class Drake():
         
         self.tile = Tile("img/drake.png", self.widthSprite, self.heightSprite);
         self.bricksStand = [Brick(0, 0, self.tile), Brick(0, 1, self.tile), Brick(0, 2, self.tile), Brick(0, 3, self.tile)];
-        self.bricksWalk = [Brick(4, 4, self.tile), Brick(4, 5, self.tile), Brick(4, 6, self.tile), Brick(4, 7, self.tile), Brick(4, 8, self.tile), Brick(4, 9, self.tile), Brick(4, 10, self.tile), Brick(4, 11, self.tile)];
+        self.bricksWalk = [Brick(4, 4, self.tile), Brick(4, 5, self.tile), Brick(4, 6, self.tile), Brick(4, 7, self.tile), 
+                           Brick(4, 8, self.tile), Brick(4, 9, self.tile), Brick(4, 10, self.tile), Brick(4, 11, self.tile)];
         self.bricksDuck = [Brick(21, 21, self.tile)];
-        self.bricksJump = [Brick(20, 20, self.tile)]
+        self.bricksDie = [Brick(22, 22, self.tile), Brick(21, 23, self.tile), Brick(21, 24, self.tile), Brick(21, 25, self.tile),
+                         Brick(21, 26, self.tile)];
+        self.bricksJump = [Brick(20, 20, self.tile)];
+        self.bricksDefeated = [Brick(21, 26, self.tile), Brick(21, 26, self.tile)];
         self.bricks = self.bricksStand;
         
         self.moveRight = False;
@@ -34,7 +38,9 @@ class Drake():
         self.duck = False;
         self.jumping = False;
         self.right = True;
-        self.moveBody = True;
+        self.inFinalStage = False;
+        self.dead = False;
+        self.dying = False;
         
         self.createPhysicalBody();
         
@@ -53,56 +59,46 @@ class Drake():
         bodyFixture.shape = b2.b2PolygonShape( box=(width, height));
         bodyFixture.density = 0.07;
         bodyFixture.restitution = 0;
-        bodyFixture.friction = 0.5;
+        bodyFixture.friction = 0.1;
         
         self.body.CreateFixture( bodyFixture );
         
-        
     def update(self):
-        if (self.life > 0):
+        
+#        print self.jumping
+        if (not self.dying):
             self.collision();
-      
+        
+            if (self.body.position[1] > 9):
+                self.body.ApplyForce((-10, -20), self.body.position, True);
+                self.die();
+            
             if (self.jumping):
                 self.bricks = self.bricksJump;
-                if (self.moveRight):
-                    self.right = True;
-#                    self.body.ApplyForce((0.001, 0), self.body.position, True);
-                elif (self.moveLeft):
-                    self.right = False;
-#                    self.body.ApplyForce((-0.001, 0), self.body.position, True);
-            
             elif (self.duck):
                 self.bricks = self.bricksDuck;
-           
-#            if (self.body.position[0] >= self.surface.get_width()/(2*self.PPM)):
-#                self.moveBody = False;
-#            
             elif (self.moveRight and not self.jumping):
-                if (self.moveBody or True):
-                    self.right = True;
-                    if (self.body.position[0] < 10):
-                        self.body.ApplyLinearImpulse((0.03, 0), self.body.position, True);
-                    self.bricks = self.bricksWalk;
+                self.right = True;
+                if (self.body.position[0] < 10):
+                    self.body.ApplyLinearImpulse((0.03, 0), self.body.position, True);
+                self.bricks = self.bricksWalk;
             elif (self.moveLeft and not self.jumping):
-                self.moveBody = True;
                 self.right = False;
                 self.body.ApplyLinearImpulse((-0.03, 0), self.body.position, True);
                 self.bricks = self.bricksWalk;
             else:
                 self.bricks = self.bricksStand;
             
-            self.animationStep += 1;
-            if (self.animationStep == self.animationSpeed):
-                self.counter += 1;
-                if (self.counter == len(self.bricks)):
-                    self.counter = 0;
-                self.animationStep = 0;
+        self.animationStep += 1;
+        if (self.animationStep == self.animationSpeed):
+            self.counter += 1;
+            if (self.counter == len(self.bricks)):
+                if (self.dying):
+                    self.dead = True
+                    self.bricks = self.bricksDefeated;
+                self.counter = 0;
+            self.animationStep = 0;
             
-            self.drawLifeBar();
-            
-        else:
-            self.die();
-        
         self.render();
         
     def render(self):
@@ -120,10 +116,6 @@ class Drake():
         
         self.surface.blit(sprite, (self.body.position[0]*self.PPM - self.widthSprite/2, self.body.position[1]*self.PPM - self.heightSprite/2 - 5));
         
-    def drawLifeBar(self):
-        
-        pygame.draw.rect(self.surface, (255, 0, 0), Rect((10, 10), (self.life*2, 10)), 0);
-    
     def jump(self):
         self.animationStep = 0;
         self.jumping = True;
@@ -133,7 +125,8 @@ class Drake():
         self.body.ApplyForce((0, -impulse), self.body.position, True);
         
     def die(self):
-        print "DEATH";
+        self.bricks = self.bricksDie;
+        self.dying = True;
         
         
     def getEvent(self, eventType, eventKey):
@@ -160,21 +153,24 @@ class Drake():
             elif (eventKey == pygame.locals.K_DOWN):
                 self.duck = False;
             
-    def getHit(self, damage):
-        self.life -= damage;    
+    def getHit(self):
+        if (not self.dying):
+            self.die();    
         
     def collision(self):
-        for contact_edge in self.body.contacts:
-            contact = contact_edge.contact;
-            other = contact.fixtureA.body;
-            otherName = other.userData["name"];
-            if (self.jumping and otherName == "floor"):
-                self.jumping = False;
-                self.animationStep = 0;
-                self.counter = 0;
-                self.bricks = self.bricksStand;
+        enemy = None;
+        for contact_edges in self.body.contacts:
+            contact = contact_edges.contact;
             
-        
+            if (contact.fixtureA.body.userData["name"] == "drake"):
+                enemy = contact.fixtureB.body;
+            elif (contact.fixtureB.body.userData["name"] == "drake"):
+                enemy = contact.fixtureA.body;
+            
+            if (not self.inFinalStage):
+                if (enemy.userData["name"] == "finalStage"):
+                    self.inFinalStage = True;
+            self.jumping = False;
         
         
         

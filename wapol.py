@@ -113,11 +113,6 @@ class Wapol():
         
     def render(self):
         if (not self.dead):
-            shape = self.body.fixtures[0].shape;
-            pixelVertices = [];
-            for vertice in shape.vertices:
-                v = self.body.transform * vertice * self.PPM;
-                pixelVertices.append(v);
             
 #            pygame.draw.polygon(self.surface, (0, 0, 255), pixelVertices);
             if (self.right):
@@ -134,16 +129,17 @@ class Wapol():
         self.dying = True;
         
     def collision(self):
-        
+        enemy = None;
         for contact_edges in self.body.contacts:
             contact = contact_edges.contact;
-            if (contact.fixtureA.body.userData["name"] == "wapol"):
-                enemy = contact.fixtureB.body;
-            else :
+            if (contact.fixtureA.body.userData["name"] == "drake"):
                 enemy = contact.fixtureA.body;
-           
-            if (contact.manifold.localNormal == (0, 1)):
-                self.die(enemy);
-            else:
-                enemy.userData["self"].getHit(10);
+            elif (contact.fixtureB.body.userData["name"] == "drake"):
+                enemy = contact.fixtureB.body;
+            
+            if (enemy != None):
+                if (contact.manifold.localNormal == (0, 1)):
+                    self.die(enemy);
+                else:
+                    enemy.userData["self"].getHit();
         

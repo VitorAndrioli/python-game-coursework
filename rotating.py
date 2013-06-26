@@ -3,8 +3,10 @@ from brick import Brick;
 from tile import Tile;
 import pygame;
 
+#Personagem Somersault, summonado pelo Boss. Nao pode ser morto pelo Heroi.
+
 class Somersault():
-    def __init__(self, pos, surface, world, PPM):
+    def __init__(self, pos, surface, world, PPM, right):
 
         self.world = world;
         self.surface = surface;
@@ -13,13 +15,11 @@ class Somersault():
         self.width = 63;
         self.height = 61;
         self.pos = (pos[0]/self.PPM, pos[1]/self.PPM);
-        
+        self.newborn = True;
+
         self.counter = 0;
         self.animationStep = 0;
         self.animationSpeed = 20;
-        self.moveCounter = 0;
-        self.deathCounter = 0;
-        self.range = 900;
         
         self.tile = Tile("img/rotating.png", self.width, self.height);
         self.bricks = [Brick(0, 0, self.tile), Brick(0, 1, self.tile), Brick(0, 2, self.tile), 
@@ -28,8 +28,7 @@ class Somersault():
         
         self.moveRight = True;
         self.moveLeft = False;
-        self.right = True;
-        self.dying = False;
+        self.right = right;
         self.dead = False;
         
         self.createPhysicalBody();
@@ -46,6 +45,7 @@ class Somersault():
         bodyFixture = b2.b2FixtureDef();
         bodyFixture.density = 17;
         bodyFixture.restitution = 0.7;
+        bodyFixture.friction = 0.1;
         width = float(self.width)/(2*self.PPM);
         height = float(self.height)/(2*self.PPM);
         bodyFixture.shape = b2.b2PolygonShape( box=(width, height));
@@ -55,84 +55,61 @@ class Somersault():
     def update(self):
         
         self.collision();
-        if (not self.dying):
-            
-            self.body.ApplyLinearImpulse((1.9, 0), self.body.position, True);
         
-#            if (self.moveCounter == self.range):
-#                self.walk("left");
-#            elif (self.moveCounter == self.range*2):
-#                self.walk("right");
-#                self.moveCounter = 0;
-#        
-            self.moveCounter += 1;
+        self.checkLife();
         
-            self.animationStep += 1;
-            if (self.animationStep == self.animationSpeed):
-                self.counter += 1;
-                if (self.counter == len(self.bricks)):
-                    self.counter = 0;
-                self.animationStep = 0;
+        #aplica impulso para cima quando personagem "nasce"
+        if (self.newborn):
+            self.body.ApplyForce((0, -1000), self.body.position, True);
+            self.newborn = False;
+        
+        #ajusta a velocidade relativa ao lado para o qual o personagem esta indo
+        if (self.right):
+            impulse = 1.4;
         else:
-            if (self.deathCounter == 50):
-                self.counter = 1
-            elif (self.deathCounter == 70):
-                self.world.DestroyBody(self.body);
-                self.dead = True;
-            self.deathCounter += 1;
+            impulse = -1.4;
+        self.body.ApplyLinearImpulse((impulse, 0), self.body.position, True);
+        
+        self.animationStep += 1;
+        if (self.animationStep == self.animationSpeed):
+            self.counter += 1;
+            if (self.counter == len(self.bricks)):
+                self.counter = 0;
+            self.animationStep = 0;
             
         self.render();
     
-    def walk(self, direction):
-        self.counter = 0;
-        self.animationStep = 0;
-        self.animationSpeed = 30;
-        if (direction == "right"):
-            self.moveRight = True;
-            self.moveLeft = False;
-            self.right = True;
-            vel = 0.5;
-        else:
-            self.moveRight = False;
-            self.moveLeft = True;
-            self.right = False;
-            vel = -0.5;
-                
-        self.body.linearVelocity = ((vel, 0));
-        
     def render(self):
         if (not self.dead):
-            shape = self.body.fixtures[0].shape;
-            pixelVertices = [];
-            for vertice in shape.vertices:
-                v = self.body.transform * vertice * self.PPM;
-                pixelVertices.append(v);
             
-#            pygame.draw.polygon(self.surface, (0, 0, 255), pixelVertices);
+            #ajusta a sprite de acordo com a direcao do personagem
             if (self.right):
                 sprite = self.bricks[self.counter].getImage();
             else :
                 sprite = pygame.transform.flip(self.bricks[self.counter].getImage(), True, False);
+            self.surface.blit(sprite, (self.body.position[0]*self.PPM - self.width/2, self.body.position[1]*self.PPM - self.height/2 + 3));
+    
+            #desenha corpo para debug
+#            shape = self.body.fixtures[0].shape;
+#            pixelVertices = [];
+#            for vertice in shape.vertices:
+#                v = self.body.transform * vertice * self.PPM;
+#                pixelVertices.append(v);
+#            pygame.draw.polygon(self.surface, (0, 0, 255), pixelVertices);
             
-            self.surface.blit(sprite, (self.body.position[0]*self.PPM - self.width/2, self.body.position[1]*self.PPM - self.height/2 - 5));
-            
-    def die(self, enemy):
-        enemy.ApplyForce((0, -10), enemy.position, True);
-        self.counter = 0;
-        self.bricks = self.bricksDie;
-        self.dying = True;
-        
+    def checkLife(self):
+        if (self.body.position[1] > 10):
+            self.world.DestroyBody(self.body);
+            self.dead = True;
+    
     def collision(self):
-        
+        enemy = None;
         for contact_edges in self.body.contacts:
             contact = contact_edges.contact;
-            if (contact.fixtureA.body.userData["name"] == "somersault"):
-                enemy = contact.fixtureB.body;
-            else :
+            if (contact.fixtureA.body.userData["name"] == "drake"):
                 enemy = contact.fixtureA.body;
-           
-#            if (contact.manifold.localNormal == (0, 1)):
-#                self.die(enemy);
-#            else:
-#                enemy.userData["self"].getHit(10);
-#        
+            elif (contact.fixtureB.body.userData["name"] == "drake"):
+                enemy = contact.fixtureB.body;
+            if (enemy != None):
+                enemy.userData["self"].getHit();
+        

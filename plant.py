@@ -3,23 +3,24 @@ from tile import Tile;
 import Box2D as b2;
 import pygame;
 
+#Personagem planta Assassina. Nao pode ser morta pelo Heroi
+
 class Plant():
     def __init__(self, pos, surface, world, PPM):
         #physical variables
         self.width = 96;
         self.height = 75;
         self.pos = pos;
-        self.damage = 11;
+        
         #animation variables
         self.counter = 0;
         self.animationSpeed = 300;
         self.animationStep = 0;
-        self.ableToMove = True;
         
+        #bricks and tiles
         self.tile = Tile("img/killer_plant.png", self.width, self.height);
         self.bricksStand = [Brick(0, 0, self.tile), Brick(0, 1, self.tile)];
         self.bricksAttack = [Brick(0, 2, self.tile), Brick(0, 3, self.tile), Brick(0, 3, self.tile), Brick(0, 1, self.tile)]; 
-        
         self.bricks = self.bricksStand;
         
         #drawing variables
@@ -49,53 +50,61 @@ class Plant():
         bodyFixture.restitution = 0;
         
         self.body.CreateFixture(bodyFixture);
-        
+    
     def update(self):
         self.collision();
-        self.animationStep += 1;
+        
         if (self.animationStep == self.animationSpeed):
             self.counter += 1;
+            
             if (self.counter == len(self.bricks)):
                 self.counter = 0;
                 if (self.attacking):
                     self.backToNormal();
             self.animationStep = 0;
+        self.animationStep += 1;
+        
         self.render();
         
+    #desenhar personagem
     def render(self):
-        shape = self.body.fixtures[0].shape;
-        pixelVertices = [];
-        for vertice in shape.vertices:
-            v = self.body.transform * vertice * self.PPM;
-            pixelVertices.append(v);
-            
-#        pygame.draw.polygon(self.surface, (0, 255, 255), pixelVertices);
-        self.surface.blit(self.bricks[self.counter].getImage(), (self.body.position[0]*self.PPM - self.width/2, self.body.position[1]*self.PPM - self.height/2));
     
+        self.surface.blit(self.bricks[self.counter].getImage(), (self.body.position[0]*self.PPM - self.width/2, self.body.position[1]*self.PPM - self.height/2));
+        #desenha o corpo para debug
+#        shape = self.body.fixtures[0].shape;
+#        pixelVertices = [];
+#        for vertice in shape.vertices:
+#            v = self.body.transform * vertice * self.PPM;
+#            pixelVertices.append(v);
+#        pygame.draw.polygon(self.surface, (0, 255, 255), pixelVertices);
+        
+    #mudar para modo de ataque
     def attack(self, enemy):
-        enemy.ApplyForce((-3, -5), enemy.position, True);
-        enemy.userData["self"].getHit(self.damage);
+        enemy.ApplyForce((-1, -3), enemy.position, True);
+        enemy.userData["self"].getHit();
         self.counter = 0;
         self.animationStep = 0;
         self.bricks = self.bricksAttack;
         self.attacking = True;
         self.animationSpeed = self.animationSpeed / 3;
         
+    #voltar para o estado stand by
     def backToNormal(self):
-        self.ableToMove = True;
         self.animationStep = 0;
         self.bricks = self.bricksStand;
         self.animationSpeed = self.animationSpeed * 3;
         self.attacking = False;
-        
+    
+    #Checar colisao
     def collision(self):
-        
+        enemy = None;
         for contact_edges in self.body.contacts:
             contact = contact_edges.contact;
-            if (contact.fixtureA.body.userData["name"] == "plant"):
-                enemy = contact.fixtureB.body;
-            else :
+            if (contact.fixtureA.body.userData["name"] == "drake"):
                 enemy = contact.fixtureA.body;
-           
-            self.attack(enemy);
-               
+            elif (contact.fixtureB.body.userData["name"] == "drake"):
+                enemy = contact.fixtureB.body;
+            
+            if (enemy != None):
+                self.attack(enemy);
+        
