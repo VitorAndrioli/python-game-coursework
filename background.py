@@ -16,7 +16,7 @@ class Background():
         self.pos = (0, 0);
         self.bgSurface = pygame.Surface((16000, 608), 0, 32);
         
-        self.file = "json/back2.json";
+        self.file = "json/back.json";
         self.loadObjects();
         self.getTileSet();
         
@@ -55,7 +55,7 @@ class Background():
         bodyFixture = b2.b2FixtureDef();
         bodyFixture.shape = b2.b2PolygonShape( box=(width/2, height/2));
         bodyFixture.restitution = 0;
-        bodyFixture.friction = 0.3;
+        bodyFixture.friction = 0.5;
         
         self.body.CreateFixture( bodyFixture );
     

@@ -21,6 +21,7 @@ class Drake():
         self.counter = 0;
         self.animationStep = 0;
         self.animationSpeed = 80;
+        self.deathCounter = 0;
         
         self.tile = Tile("img/drake.png", self.widthSprite, self.heightSprite);
         self.bricksStand = [Brick(0, 0, self.tile), Brick(0, 1, self.tile), Brick(0, 2, self.tile), Brick(0, 3, self.tile)];
@@ -30,7 +31,7 @@ class Drake():
         self.bricksDie = [Brick(22, 22, self.tile), Brick(21, 23, self.tile), Brick(21, 24, self.tile), Brick(21, 25, self.tile),
                          Brick(21, 26, self.tile)];
         self.bricksJump = [Brick(20, 20, self.tile)];
-        self.bricksDefeated = [Brick(21, 26, self.tile), Brick(21, 26, self.tile)];
+        self.bricksDefeated = [Brick(21, 24, self.tile), Brick(21, 24, self.tile)];
         self.bricks = self.bricksStand;
         
         self.moveRight = False;
@@ -63,15 +64,32 @@ class Drake():
         
         self.body.CreateFixture( bodyFixture );
         
+    def turnToKinemact(self):
+        bodyDef = b2.b2BodyDef();
+        bodyDef.position = self.body.position;
+        bodyDef.angle = 0;
+        bodyDef.fixedRotation = True;
+        bodyDef.type = b2.b2_kinematicBody;
+        self.body = self.world.CreateBody( bodyDef );
+        self.body.userData = {"name": "drake", "self": self};
+        
+        bodyFixture = b2.b2FixtureDef();
+        width = float(self.width)/(2*self.PPM);
+        height = float(self.height)/(2*self.PPM);
+        bodyFixture.shape = b2.b2PolygonShape( box=(width, height));
+        
+        self.body.CreateFixture( bodyFixture );
+        
     def update(self):
         
-#        print self.jumping
+        
+        if (self.body.type == 2):
+            if (self.body.position[1] > 9):
+                self.body.ApplyForce((-10, -10), self.body.position, True);
+                self.die();
+    
         if (not self.dying):
             self.collision();
-        
-            if (self.body.position[1] > 9):
-                self.body.ApplyForce((-10, -20), self.body.position, True);
-                self.die();
             
             if (self.jumping):
                 self.bricks = self.bricksJump;
@@ -89,26 +107,29 @@ class Drake():
             else:
                 self.bricks = self.bricksStand;
             
+        else:
+            self.deathCounter += 1;
+            if (self.deathCounter == 60):
+                self.body.linearVelocity = (-0.1, 2);
+        
         self.animationStep += 1;
         if (self.animationStep == self.animationSpeed):
             self.counter += 1;
             if (self.counter == len(self.bricks)):
                 if (self.dying):
                     self.dead = True
-                    self.bricks = self.bricksDefeated;
                 self.counter = 0;
-            self.animationStep = 0;
-            
+            self.animationStep = 0;    
         self.render();
         
     def render(self):
-        shape = self.body.fixtures[0].shape;
-        pixelVertices = [];
-        for vertice in shape.vertices:
-            v = self.body.transform * vertice * self.PPM;
-            pixelVertices.append(v);
-        
+#        shape = self.body.fixtures[0].shape;
+#        pixelVertices = [];
+#        for vertice in shape.vertices:
+#            v = self.body.transform * vertice * self.PPM;
+#            pixelVertices.append(v);
 #        pygame.draw.polygon(self.surface, (0, 0, 255), pixelVertices);
+        
         if (self.right):
             sprite = self.bricks[self.counter].getImage();
         else :
@@ -125,7 +146,9 @@ class Drake():
         self.body.ApplyForce((0, -impulse), self.body.position, True);
         
     def die(self):
-        self.bricks = self.bricksDie;
+        self.bricks = self.bricksDefeated;
+        self.turnToKinemact();
+        self.body.linearVelocity = (-0.1, -2);
         self.dying = True;
         
         
@@ -171,7 +194,4 @@ class Drake():
                 if (enemy.userData["name"] == "finalStage"):
                     self.inFinalStage = True;
             self.jumping = False;
-        
-        
-        
         

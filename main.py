@@ -24,16 +24,16 @@ background = Background(surface, world, PPM);
 drake = Drake((400, 0), surface, world, PPM);
 
 #criacao dos viloes
-#plantList = [Plant((600, 330), surface, world, PPM), Plant((1920, 550), surface, world, PPM), Plant((3550, 550), surface, world, PPM), 
-#            Plant((3850, 550), surface, world, PPM), Plant((4120, 550), surface, world, PPM), Plant((4780, 550), surface, world, PPM), 
-#            Plant((5350, 550), surface, world, PPM), Plant((8700, 550), surface, world, PPM), Plant((9680, 550), surface, world, PPM)];
-#
-#wapolList = [Wapol((1700, 547), surface, world, PPM, 500), Wapol((3240, 547), surface, world, PPM, 380), 
-#             Wapol((5236, 420), surface, world, PPM, 326), Wapol((6100, 547), surface, world, PPM, 526), 
-#             Wapol((6350, 547), surface, world, PPM, 882), Wapol((9050, 547), surface, world, PPM, 832),
-#             Wapol((9780, 547), surface, world, PPM, 218), Wapol((12200, 547), surface, world, PPM, 824),
-#             Wapol((12700, 547), surface, world, PPM, 632), Wapol((13400, 547), surface, world, PPM, 902),
-#             Wapol((13100, 547), surface, world, PPM, 500)];
+plantList = [Plant((600, 330), surface, world, PPM), Plant((1920, 550), surface, world, PPM), Plant((3550, 550), surface, world, PPM), 
+            Plant((3850, 550), surface, world, PPM), Plant((4120, 550), surface, world, PPM), Plant((4780, 550), surface, world, PPM), 
+            Plant((5350, 550), surface, world, PPM), Plant((8700, 550), surface, world, PPM), Plant((9680, 550), surface, world, PPM)];
+
+wapolList = [Wapol((1700, 547), surface, world, PPM, 500), Wapol((3240, 547), surface, world, PPM, 380), 
+             Wapol((5236, 420), surface, world, PPM, 326), Wapol((6100, 547), surface, world, PPM, 526), 
+             Wapol((6350, 547), surface, world, PPM, 882), Wapol((9050, 547), surface, world, PPM, 832),
+             Wapol((9780, 547), surface, world, PPM, 218), Wapol((12200, 547), surface, world, PPM, 824),
+             Wapol((12700, 547), surface, world, PPM, 632), Wapol((13400, 547), surface, world, PPM, 902),
+             Wapol((13100, 547), surface, world, PPM, 500)];
 
 somersaultList = []
 
@@ -67,13 +67,13 @@ while(True):
         if (boss != None):
             boss.update();
         
-#        for plant in plantList:
-#            plant.update();
-#            
-#        for wapol in wapolList:
-#            if (not wapol.dead):
-#                wapol.update();
-#        
+        for plant in plantList:
+            plant.update();
+            
+        for wapol in wapolList:
+            if (not wapol.dead):
+                wapol.update();
+        
         for somersault in somersaultList:
             if (not somersault.dead):
                 somersault.update();
@@ -111,10 +111,9 @@ while(True):
             elif (e.key == pygame.locals.K_p):
                 paused = True;
                 menu = Menu(False);
-            elif (e.key == pygame.locals.K_z):
-                boss = Boss((14630, 520), surface, world, PPM, somersaultList);
-#                    PPM -= 5;
-                    
+#            elif (e.key == pygame.locals.K_z):
+#                new = Somersault((10, 10), surface, world, PPM, True);
+#                somersaultList.append(new);
         elif (e.type == pygame.locals.KEYUP):
             if (not paused):
                 drake.getEvent(e.type, e.key);
