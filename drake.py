@@ -4,36 +4,61 @@ from tile import Tile;
 import pygame;
 from pygame import Rect;
 
-#Classe dp heroi, X-Drake
+#Classe do heroi, X-Drake
 
 class Drake():
     def __init__(self, pos, surface, world, PPM):
+        #Constantes do personagem
         self.width = 60;
         self.height = 115;
         self.widthSprite = 265;
         self.heightSprite = 148;
-        self.pos = (pos[0]/PPM, pos[1]/PPM);
+        self.dinoWidth = 100;
+        self.dinoHeight = 100;
+        self.dinoWidthSprite = 100;
+        self.dinoHeightSprite = 100;
         
         self.world = world;
         self.surface = surface;
         self.PPM = PPM;
         
+        #Variaveis para animacao
+        self.pos = (pos[0]/PPM, pos[1]/PPM);
         self.counter = 0;
         self.animationStep = 0;
         self.animationSpeed = 80;
         self.deathCounter = 0;
+        self.dino = False;
         
-        self.tile = Tile("img/drake.png", self.widthSprite, self.heightSprite);
-        self.bricksStand = [Brick(0, 0, self.tile), Brick(0, 1, self.tile), Brick(0, 2, self.tile), Brick(0, 3, self.tile)];
-        self.bricksWalk = [Brick(4, 4, self.tile), Brick(4, 5, self.tile), Brick(4, 6, self.tile), Brick(4, 7, self.tile), 
-                           Brick(4, 8, self.tile), Brick(4, 9, self.tile), Brick(4, 10, self.tile), Brick(4, 11, self.tile)];
-        self.bricksDuck = [Brick(21, 21, self.tile)];
-        self.bricksDie = [Brick(22, 22, self.tile), Brick(21, 23, self.tile), Brick(21, 24, self.tile), Brick(21, 25, self.tile),
-                         Brick(21, 26, self.tile)];
-        self.bricksJump = [Brick(20, 20, self.tile)];
-        self.bricksDefeated = [Brick(21, 24, self.tile), Brick(21, 24, self.tile)];
+        #Tilesets e Bricks
+        tileSet = Tile("img/drake.png", self.widthSprite, self.heightSprite);
+        self.bricksDrakeStand = [Brick(0, 0, tileSet), Brick(0, 1, tileSet), Brick(0, 2, tileSet), Brick(0, 3, tileSet)];
+        self.bricksDrakeWalk = [Brick(4, 4, tileSet), Brick(4, 5, tileSet), Brick(4, 6, tileSet), Brick(4, 7, tileSet), 
+                           Brick(4, 8, tileSet), Brick(4, 9, tileSet), Brick(4, 10, tileSet), Brick(4, 11, tileSet)];
+        self.bricksDrakeDuck = [Brick(21, 21, tileSet)];
+        self.bricksDie = [Brick(22, 22, tileSet), Brick(21, 23, tileSet), Brick(21, 24, tileSet), Brick(21, 25, tileSet),
+                         Brick(21, 26, tileSet)];
+        self.bricksDrakeJump = [Brick(20, 20, tileSet)];
+        self.bricksDefeated = [Brick(21, 24, tileSet), Brick(21, 24, tileSet)];
+        
+        dinoTileSet = Tile("img/dino.png", self.dinoWidthSprite, self.dinoHeightSprite);
+        self.bricksDinoTransform = [Brick(0, 0, dinoTileSet), Brick(0, 1, dinoTileSet), Brick(0, 2, dinoTileSet),
+                                    Brick(0, 3, dinoTileSet), Brick(0, 4, dinoTileSet), Brick(0, 5, dinoTileSet),
+                                    Brick(0, 6, dinoTileSet), Brick(0, 7, dinoTileSet)];
+        self.bricksdinoStand = [Brick(17, 17, dinoTileSet), Brick(17, 18, dinoTileSet)];
+        self.bricksDinoWalk = [Brick(11, 11, dinoTileSet), Brick(11, 12, dinoTileSet), Brick(11, 13, dinoTileSet),
+                               Brick(11, 14, dinoTileSet), Brick(11, 15, dinoTileSet), Brick(11, 16, dinoTileSet)];
+        self.bricksDrakeTransform = [Brick(7, 7, dinoTileSet), Brick(7, 8, dinoTileSet), Brick(7, 9, dinoTileSet),
+                                     Brick(7, 10, dinoTileSet)];
+                                     
+        self.bricksStand = self.bricksDrakeStand;
+        self.bricksWalk = self.bricksDrakeWalk;
+        self.bricksDuck = self.bricksDrakeDuck;
+        self.bricksJump = self.bricksDrakeJump;
+        
         self.bricks = self.bricksStand;
         
+        #Booleanas para controlar a movimentacao
         self.moveRight = False;
         self.moveLeft = False;
         self.duck = False;
@@ -43,27 +68,36 @@ class Drake():
         self.dead = False;
         self.dying = False;
         
-        self.createPhysicalBody();
+        self.createPhysicalBody("normal");
         
-    def createPhysicalBody(self):
+    def createPhysicalBody(self, mode):
         bodyDef = b2.b2BodyDef();
         bodyDef.position = (self.pos[0], self.pos[1]);
         bodyDef.angle = 0;
         bodyDef.fixedRotation = True;
         bodyDef.type = b2.b2_dynamicBody;
+        
         self.body = self.world.CreateBody( bodyDef );
         self.body.userData = {"name": "drake", "self": self};
         
+        if (mode == "normal"):
+            width = float(self.width)/(2*self.PPM);
+            height = float(self.height)/(2*self.PPM);
+            density = 0.07;
+        elif (mode == "dino"):
+            width = float(self.dinoWidth)/(2*self.PPM);
+            height = float(self.dinoHeight)/(2*self.PPM);
+            density = 0.07;
+            
         bodyFixture = b2.b2FixtureDef();
-        width = float(self.width)/(2*self.PPM);
-        height = float(self.height)/(2*self.PPM);
         bodyFixture.shape = b2.b2PolygonShape( box=(width, height));
-        bodyFixture.density = 0.07;
+        bodyFixture.density = density;
         bodyFixture.restitution = 0;
         bodyFixture.friction = 0.1;
         
         self.body.CreateFixture( bodyFixture );
-        
+    
+    #Transformar o body em kinematic, para animação de "morte"
     def turnToKinemact(self):
         bodyDef = b2.b2BodyDef();
         bodyDef.position = self.body.position;
@@ -81,8 +115,6 @@ class Drake():
         self.body.CreateFixture( bodyFixture );
         
     def update(self):
-        
-        
         if (self.body.type == 2):
             if (self.body.position[1] > 9):
                 self.body.ApplyForce((-10, -10), self.body.position, True);
@@ -123,6 +155,7 @@ class Drake():
         self.render();
         
     def render(self):
+    #Desenhar o body para debug
 #        shape = self.body.fixtures[0].shape;
 #        pixelVertices = [];
 #        for vertice in shape.vertices:
@@ -145,13 +178,26 @@ class Drake():
         impulse = self.body.mass * 350;
         self.body.ApplyForce((0, -impulse), self.body.position, True);
         
+    def getHit(self):
+        if (not self.dying):
+            self.die();    
+        
     def die(self):
         self.bricks = self.bricksDefeated;
         self.turnToKinemact();
         self.body.linearVelocity = (-0.1, -2);
         self.dying = True;
         
-        
+    def turnToDino(self):
+        if (not self.dino):
+        self.dino = True;
+            self.createPhysicalBody("dino");
+            self.bricks = self.bricksDinoTransform;
+            self.bricksStand = self.bricksDinoStand;
+            self.bricksWalk = self.bricksDinoWalk;
+            self.bricksDuck = self.bricksDinoDuck;
+            self.bricksJump = self.bricksDinoJump;
+    
     def getEvent(self, eventType, eventKey):
         self.counter = 0;
         if (eventType == pygame.locals.KEYDOWN):
@@ -159,7 +205,6 @@ class Drake():
                 self.moveRight = True;
                 if (self.jumping):
                     self.body.ApplyForce((0.0001, 0), self.body.position, True);
-                    
             elif (eventKey == pygame.locals.K_LEFT):
                 self.moveLeft = True;
                 if (self.jumping):
@@ -168,6 +213,8 @@ class Drake():
                 self.duck = True;
             elif (eventKey == pygame.locals.K_UP):
                 self.jump()
+            elif (eventKey == pygame.locals.K_SPACEBAR):
+                self.turnToDino();
         elif (eventType == pygame.locals.KEYUP):
             if (eventKey == pygame.locals.K_RIGHT):
                 self.moveRight = False;
@@ -176,10 +223,6 @@ class Drake():
             elif (eventKey == pygame.locals.K_DOWN):
                 self.duck = False;
             
-    def getHit(self):
-        if (not self.dying):
-            self.die();    
-        
     def collision(self):
         enemy = None;
         for contact_edges in self.body.contacts:
