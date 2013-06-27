@@ -130,7 +130,7 @@ class Wapol():
             self.surface.blit(sprite, (self.body.position[0]*self.PPM - self.widthSprite/2, self.body.position[1]*self.PPM - self.heightSprite/2 - 5));
             
     def die(self, enemy):
-        enemy.ApplyForce((0, -10), enemy.position, True);
+        enemy.ApplyForce((-2, -50), enemy.position, True);
         self.counter = 0;
         self.bricks = self.bricksDie;
         self.dying = True;

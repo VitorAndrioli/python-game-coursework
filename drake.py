@@ -74,7 +74,7 @@ class Drake():
         self.dying = False;
         self.dino = False;
         self.jumped = False;
-        
+        self.transforming = False;
         self.createPhysicalBody("drake");
         
     def createPhysicalBody(self, mode):
@@ -94,13 +94,13 @@ class Drake():
         elif (mode == "dino"):
             width = float(self.dinoWidth)/(2*self.PPM);
             height = float(self.dinoHeight)/(2*self.PPM);
-            density = 0.03;
+            density = 0.02;
             
         bodyFixture = b2.b2FixtureDef();
         bodyFixture.shape = b2.b2PolygonShape( box=(width, height));
         bodyFixture.density = density;
         bodyFixture.restitution = 0;
-        bodyFixture.friction = 0.1;
+        bodyFixture.friction = 0.5;
         
         self.body.CreateFixture( bodyFixture );
     
@@ -130,6 +130,12 @@ class Drake():
         if (not self.dying):
             
             if (self.jumping):
+                if (self.moveRight):
+                    self.body.ApplyForce((8, 0), self.body.position, True);
+                    self.moveRight = False;
+                elif (self.moveLeft):
+                    self.body.ApplyForce((-8, 0), self.body.position, True);
+                    self.moveLeft = False;
                 self.jumpingCounter += 1;
                 if (self.jumpingCounter == 30):
                     self.jumped = True;
@@ -149,6 +155,12 @@ class Drake():
                 self.body.ApplyLinearImpulse((-0.03, 0), self.body.position, True);
                 self.bricks = self.bricksWalk;
             
+            elif (self.transforming):
+                if (self.counter == len(self.bricks) - 1):
+                    self.transforming = False;
+                    self.counter = 0;
+                    self.animationStep = 0;
+                    self.animationSpeed = 40;
             else:
                 self.bricks = self.bricksStand;
             
@@ -210,20 +222,23 @@ class Drake():
         self.dying = True;
         
     def turnToDino(self):
-        if (not self.dino):
-            self.dino = True;
-            self.pos = self.body.position;
-            self.world.DestroyBody(self.body);
-            self.bricks = self.bricksDinoTransform;
-            self.bricksStand = self.bricksDinoStand;
-            self.bricksWalk = self.bricksDinoWalk;
-            
-            self.width = self.dinoWidth;
-            self.height = self.dinoHeight;
-            self.widthSprite = self.dinoWidthSprite;
-            self.heightSprite = self.dinoHeightSprite;
-            self.createPhysicalBody("dino");
-            
+        self.dino = True;
+        self.transforming = True;
+        self.pos = self.body.position;
+        self.world.DestroyBody(self.body);
+        self.bricks = self.bricksDinoTransform;
+        self.bricksStand = self.bricksDinoStand;
+        self.bricksWalk = self.bricksDinoWalk;
+        self.animationStep = 0;
+        self.counter = 0;
+        self.animationSpeed = 30;
+        
+        self.width = self.dinoWidth;
+        self.height = self.dinoHeight;
+        self.widthSprite = self.dinoWidthSprite;
+        self.heightSprite = self.dinoHeightSprite;
+        self.createPhysicalBody("dino");
+        
     def turnToDrake(self):
         self.dino = False;
         self.pos = self.body.position;
@@ -231,6 +246,9 @@ class Drake():
         self.bricks = self.bricksDrakeTransform;
         self.bricksStand = self.bricksDrakeStand;
         self.bricksWalk = self.bricksDrakeWalk;
+        self.animationStep = 0;
+        self.counter = 0;
+        self.animationSpeed = 30;
         
         self.width = self.drakeWidth;
         self.height = self.drakeHeight;
@@ -244,14 +262,16 @@ class Drake():
             if (eventKey == pygame.locals.K_RIGHT):
                 self.moveRight = True;
                 if (self.jumping):
-                    print "go"
-                    self.body.ApplyForce((1, 0), self.body.position, True);
+                    self.body.ApplyForce((10, 0), self.body.position, True);
+
             if (eventKey == pygame.locals.K_LEFT):
                 self.moveLeft = True;
                 if (self.jumping):
-                    self.body.ApplyForce((-0.0001, 0), self.body.position, True);
+                    self.body.ApplyForce((-10, 0), self.body.position, True);
+            
             if (eventKey == pygame.locals.K_DOWN):
                 self.duck = True;
+            
             if (eventKey == pygame.locals.K_UP):
                 if (not self.jumping):
                     self.jump()

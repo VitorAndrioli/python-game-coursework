@@ -29,15 +29,15 @@ world = b2.b2World(gravidade, True);
 #Criacao fo cenario e do heroi
 background = Background(surface, world, PPM);
 plataformList = [Plataform((7200, 600),surface, world, PPM, 700, True), Plataform((14000, 220),surface, world, PPM, 3000, False),
-                 Plataform((0, 200),surface, world, PPM, 15000, True)];
+                 Plataform((0, 150),surface, world, PPM, 15000, True)];
 
 
 drake = Drake((10, 0), surface, world, PPM);
 
 #criacao dos viloes
-plantList = [Plant((600, 330), surface, world, PPM), Plant((1920, 550), surface, world, PPM), Plant((3550, 550), surface, world, PPM), 
-            Plant((3850, 550), surface, world, PPM), Plant((4120, 550), surface, world, PPM), Plant((4780, 550), surface, world, PPM), 
-            Plant((5350, 550), surface, world, PPM), Plant((8700, 550), surface, world, PPM), Plant((9680, 550), surface, world, PPM)];
+#plantList = [Plant((600, 330), surface, world, PPM), Plant((1920, 550), surface, world, PPM), Plant((3550, 550), surface, world, PPM), 
+#            Plant((3850, 550), surface, world, PPM), Plant((4120, 550), surface, world, PPM), Plant((4780, 550), surface, world, PPM), 
+#            Plant((5350, 550), surface, world, PPM), Plant((8700, 550), surface, world, PPM), Plant((9680, 550), surface, world, PPM)];
 
 wapolList = [Wapol((1700, 547), surface, world, PPM, 500), Wapol((3240, 547), surface, world, PPM, 380), 
              Wapol((5236, 420), surface, world, PPM, 326), Wapol((6100, 547), surface, world, PPM, 526), 
@@ -58,7 +58,7 @@ worldOrigin = 0;
 while(True):
     world.Step(1.0/30, 8, 3);
     surface.fill((0, 0, 0));
-    if (paused or drake.dead):
+    if (paused):
         menu.update(surface);
     
     else:
@@ -76,8 +76,8 @@ while(True):
         if (boss != None):
             boss.update();
     
-        for plant in plantList:
-            plant.update();
+#        for plant in plantList:
+#            plant.update();
         
         for wapol in wapolList:
             if (not wapol.dead):

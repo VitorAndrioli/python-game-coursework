@@ -119,8 +119,8 @@ class Boss():
     def newMob(self):
         if (self.right):
             right = True;
-            x = self.body.position[0]*self.PPM;
-            y = self.body.position[1]*self.PPM;
+            x = self.body.position[0]*self.PPM + 1;
+            y = self.body.position[1]*self.PPM + 1;
         else:
             right = False;
             x = self.body.position[0]*self.PPM - 1;
@@ -168,7 +168,7 @@ class Boss():
         self.dying = True;
         
     def getHit(self, enemy):
-        enemy.ApplyForce((-10, -10), enemy.position, True);
+        enemy.ApplyForce((-2, -5), enemy.position, True);
         self.life -= 50;
         
         if (self.life >= 1500):
@@ -183,17 +183,18 @@ class Boss():
             self.die();
         
     def collision(self):
-        enemy = None;
-        for contact_edges in self.body.contacts:
-            contact = contact_edges.contact;
-            if (contact.fixtureA.body.userData["name"] == "drake"):
-                enemy = contact.fixtureA.body;
-            elif (contact.fixtureB.body.userData["name"] == "drake"):
-                enemy = contact.fixtureB.body;
-            
-            if (enemy != None):
-                if (contact.manifold.localNormal == (0, 1)):
-                    self.getHit(enemy);
-                else:
-                    enemy.userData["self"].getHit();
+        if (not self.dying):
+            enemy = None;
+            for contact_edges in self.body.contacts:
+                contact = contact_edges.contact;
+                if (contact.fixtureA.body.userData["name"] == "drake"):
+                    enemy = contact.fixtureA.body;
+                elif (contact.fixtureB.body.userData["name"] == "drake"):
+                    enemy = contact.fixtureB.body;
+                
+                if (enemy != None):
+                    if (contact.manifold.localNormal == (0, 1)):
+                        self.getHit(enemy);
+                    else:
+                        enemy.userData["self"].getHit();
         
