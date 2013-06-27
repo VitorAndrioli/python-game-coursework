@@ -71,12 +71,12 @@ class Plant():
     
         self.surface.blit(self.bricks[self.counter].getImage(), (self.body.position[0]*self.PPM - self.width/2, self.body.position[1]*self.PPM - self.height/2));
         #desenha o corpo para debug
-        shape = self.body.fixtures[0].shape;
-        pixelVertices = [];
-        for vertice in shape.vertices:
-            v = self.body.transform * vertice * self.PPM;
-            pixelVertices.append(v);
-        pygame.draw.polygon(self.surface, (0, 255, 255), pixelVertices);
+#        shape = self.body.fixtures[0].shape;
+#        pixelVertices = [];
+#        for vertice in shape.vertices:
+#            v = self.body.transform * vertice * self.PPM;
+#            pixelVertices.append(v);
+#        pygame.draw.polygon(self.surface, (0, 255, 255), pixelVertices);
         
     #mudar para modo de ataque
     def attack(self, enemy):

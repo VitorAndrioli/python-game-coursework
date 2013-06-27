@@ -113,8 +113,15 @@ class Wapol():
         
     def render(self):
         if (not self.dead):
-            
+            #Desenhar o body para debug
+#            shape = self.body.fixtures[0].shape;
+#            pixelVertices = [];
+#            for vertice in shape.vertices:
+#                v = self.body.transform * vertice * self.PPM;
+#                pixelVertices.append(v);
+#    
 #            pygame.draw.polygon(self.surface, (0, 0, 255), pixelVertices);
+            
             if (self.right):
                 sprite = self.bricks[self.counter].getImage();
             else :
@@ -138,8 +145,9 @@ class Wapol():
                 enemy = contact.fixtureB.body;
             
             if (enemy != None):
-                if (contact.manifold.localNormal == (0, 1)):
-                    self.die(enemy);
-                else:
-                    enemy.userData["self"].getHit();
+                if (not self.dying and not enemy.userData["self"].dying):
+                    if (contact.manifold.localNormal == (0, 1) or enemy.userData["self"].dino):
+                        self.die(enemy);
+                    elif (contact.manifold.localNormal[0] != 0):
+                        enemy.userData["self"].getHit();
         
