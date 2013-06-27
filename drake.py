@@ -122,6 +122,7 @@ class Drake():
         self.body.CreateFixture( bodyFixture );
         
     def update(self):
+        print self.counter;
         if (self.body.type == 2):
             if (self.body.position[1] > 9):
                 self.body.ApplyForce((-10, -10), self.body.position, True);
